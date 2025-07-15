@@ -13,17 +13,22 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { useBoardsStore } from "../store/boards";
 
 export default {
+  setup() {
+    const boardsStore = useBoardsStore();
+    return { boardsStore };
+  },
   mounted() {
-    this.fetchBoards();
+    this.boardsStore.fetchBoards();
   },
   computed: {
-    ...mapGetters(["getBoards"]),
+    getBoards() {
+      return this.boardsStore.getBoards;
+    },
   },
   methods: {
-    ...mapActions(["fetchBoards"]),
     get() {},
   },
 };

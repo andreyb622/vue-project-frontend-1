@@ -11,12 +11,8 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-
 export default {
-  computed: {
-    ...mapGetters(["get"]),
-  },
+  // Component doesn't seem to use any store data currently
 };
 </script>
 

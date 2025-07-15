@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { useAuthStore } from "../store/auth";
 
 export default {
   data() {
@@ -22,9 +22,9 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["login"]),
     async onLogin() {
-      await this.login({
+      const authStore = useAuthStore();
+      await authStore.login({
         login: this.name,
         password: this.password,
       }).then(() => {

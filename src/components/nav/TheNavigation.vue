@@ -19,16 +19,21 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { useAuthStore } from "../../store/auth";
 
 export default {
+  setup() {
+    const authStore = useAuthStore();
+    return { authStore };
+  },
   computed: {
-    ...mapGetters(["isAuth"]),
+    isAuth() {
+      return this.authStore.isAuth;
+    },
   },
   methods: {
-    ...mapActions(["logout"]),
     logoutUser() {
-      this.logout();
+      this.authStore.logout();
       this.$router.push("/auth");
     },
   },

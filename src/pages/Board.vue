@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { useBoardsStore } from "../store/boards";
 import BoardList from "../components/BoardList";
 
 export default {
@@ -31,14 +31,22 @@ export default {
   components: {
     BoardList,
   },
+  setup() {
+    const boardsStore = useBoardsStore();
+    return { boardsStore };
+  },
   mounted() {
-    this.fetchBoard(this.id);
+    this.boardsStore.fetchBoard(this.id);
   },
   computed: {
-    ...mapGetters(["getBoard", "getUsers"]),
+    getBoard() {
+      return this.boardsStore.getBoard;
+    },
+    getUsers() {
+      return this.boardsStore.getUsers;
+    },
   },
   methods: {
-    ...mapActions(["fetchBoard"]),
     changeListName() {
       this.listHeaderFocus = false;
       console.log(this.listHeader);
