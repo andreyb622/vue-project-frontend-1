@@ -111,219 +111,183 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import type { SelectOption } from '@/types/select'
 
-export default {
-  name: 'CustomSelect',
-  props: {
-    // Array of options with {id: string, value: string} structure
-    options: {
-      type: Array,
-      required: true,
-      default: () => []
-    },
-    // Current value - can be single option or array of options
-    modelValue: {
-      type: [Object, Array],
-      default: null
-    },
-    // Enable multi-select mode
-    multi: {
-      type: Boolean,
-      default: false
-    },
-    // Enable search mode
-    searchMode: {
-      type: Boolean,
-      default: false
-    },
-    // Label for the select
-    label: {
-      type: String,
-      default: ''
-    },
-    // Placeholder text
-    placeholder: {
-      type: String,
-      default: 'Select an option...'
-    },
-    // Disabled state
-    disabled: {
-      type: Boolean,
-      default: false
+interface Props {
+  options: SelectOption[]
+  modelValue?: SelectOption | SelectOption[] | null
+  multi?: boolean
+  searchMode?: boolean
+  label?: string
+  placeholder?: string
+  disabled?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  modelValue: null,
+  multi: false,
+  searchMode: false,
+  label: '',
+  placeholder: 'Select an option...',
+  disabled: false
+})
+
+const emit = defineEmits<{
+  'update:modelValue': [value: SelectOption | SelectOption[] | null]
+}>()
+
+// Reactive state
+const isOpen = ref(false)
+const searchQuery = ref('')
+const searchInput = ref<HTMLInputElement | null>(null)
+const selectButton = ref<HTMLButtonElement | null>(null)
+
+// Computed properties
+const selectedOptions = computed((): SelectOption[] => {
+  if (!props.modelValue) return []
+  if (props.multi) {
+    return Array.isArray(props.modelValue) ? props.modelValue : []
+  }
+  return props.modelValue ? [props.modelValue as SelectOption] : []
+})
+
+const filteredOptions = computed((): SelectOption[] => {
+  if (!props.searchMode || !searchQuery.value) {
+    return props.options
+  }
+  return props.options.filter(option =>
+    option.value.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+const displayValue = computed((): string => {
+  if (props.multi) {
+    if (selectedOptions.value.length === 0) {
+      return props.placeholder
     }
-  },
-  emits: ['update:modelValue'],
-  setup(props, { emit }) {
-    const isOpen = ref(false)
-    const searchQuery = ref('')
-    const searchInput = ref(null)
-    const selectButton = ref(null)
+    return selectedOptions.value.map(option => option.value).join(', ')
+  } else {
+    return selectedOptions.value.length > 0 
+      ? selectedOptions.value[0].value 
+      : props.placeholder
+  }
+})
 
-    // Computed properties
-    const selectedOptions = computed(() => {
-      if (!props.modelValue) return []
-      if (props.multi) {
-        return Array.isArray(props.modelValue) ? props.modelValue : []
-      }
-      return props.modelValue ? [props.modelValue] : []
-    })
+// Methods
+const isSelected = (option: SelectOption): boolean => {
+  return selectedOptions.value.some(selected => selected.id === option.id)
+}
 
-    const filteredOptions = computed(() => {
-      if (!props.searchMode || !searchQuery.value) {
-        return props.options
-      }
-      return props.options.filter(option =>
-        option.value.toLowerCase().includes(searchQuery.value.toLowerCase())
-      )
-    })
-
-    const displayValue = computed(() => {
-      if (props.multi) {
-        if (selectedOptions.value.length === 0) {
-          return props.placeholder
-        }
-        return selectedOptions.value.map(option => option.value).join(', ')
-      } else {
-        return selectedOptions.value.length > 0 
-          ? selectedOptions.value[0].value 
-          : props.placeholder
-      }
-    })
-
-    // Methods
-    const isSelected = (option) => {
-      return selectedOptions.value.some(selected => selected.id === option.id)
+const selectOption = (option: SelectOption): void => {
+  if (props.multi) {
+    const newSelection = [...selectedOptions.value]
+    const existingIndex = newSelection.findIndex(item => item.id === option.id)
+    
+    if (existingIndex > -1) {
+      // Remove if already selected
+      newSelection.splice(existingIndex, 1)
+    } else {
+      // Add if not selected
+      newSelection.push(option)
     }
-
-    const selectOption = (option) => {
-      if (props.multi) {
-        const newSelection = [...selectedOptions.value]
-        const existingIndex = newSelection.findIndex(item => item.id === option.id)
-        
-        if (existingIndex > -1) {
-          // Remove if already selected
-          newSelection.splice(existingIndex, 1)
-        } else {
-          // Add if not selected
-          newSelection.push(option)
-        }
-        
-        emit('update:modelValue', newSelection)
-      } else {
-        emit('update:modelValue', option)
-        closeDropdown()
-      }
-    }
-
-    const removeOption = (option) => {
-      if (props.multi) {
-        const newSelection = selectedOptions.value.filter(item => item.id !== option.id)
-        emit('update:modelValue', newSelection)
-      }
-    }
-
-    const openDropdown = () => {
-      if (!props.disabled) {
-        isOpen.value = true
-      }
-    }
-
-    const closeDropdown = () => {
-      isOpen.value = false
-      if (props.searchMode) {
-        searchQuery.value = ''
-      }
-    }
-
-    const toggleDropdown = () => {
-      if (isOpen.value) {
-        closeDropdown()
-      } else {
-        openDropdown()
-      }
-    }
-
-    const handleBlur = () => {
-      // Delay closing to allow for option selection
-      setTimeout(() => {
-        closeDropdown()
-      }, 150)
-    }
-
-    const handleKeydown = (event) => {
-      switch (event.key) {
-        case 'Escape':
-          closeDropdown()
-          break
-        case 'Enter':
-          if (props.searchMode && filteredOptions.value.length > 0) {
-            selectOption(filteredOptions.value[0])
-          }
-          break
-        case 'ArrowDown':
-          event.preventDefault()
-          if (!isOpen.value) {
-            openDropdown()
-          }
-          break
-        case 'ArrowUp':
-          event.preventDefault()
-          if (!isOpen.value) {
-            openDropdown()
-          }
-          break
-      }
-    }
-
-    // Handle clicks outside the component
-    const handleClickOutside = (event) => {
-      const selectElement = props.searchMode ? searchInput.value : selectButton.value
-      if (selectElement && !selectElement.contains(event.target) && !event.target.closest('.absolute.z-10')) {
-        closeDropdown()
-      }
-    }
-
-    // Lifecycle
-    onMounted(() => {
-      document.addEventListener('click', handleClickOutside)
-    })
-
-    onUnmounted(() => {
-      document.removeEventListener('click', handleClickOutside)
-    })
-
-    // Watch for search mode changes
-    watch(() => props.searchMode, (newVal) => {
-      if (newVal) {
-        nextTick(() => {
-          if (searchInput.value) {
-            searchInput.value.focus()
-          }
-        })
-      }
-    })
-
-    return {
-      isOpen,
-      searchQuery,
-      searchInput,
-      selectButton,
-      selectedOptions,
-      filteredOptions,
-      displayValue,
-      isSelected,
-      selectOption,
-      removeOption,
-      openDropdown,
-      closeDropdown,
-      toggleDropdown,
-      handleBlur,
-      handleKeydown
-    }
+    
+    emit('update:modelValue', newSelection)
+  } else {
+    emit('update:modelValue', option)
+    closeDropdown()
   }
 }
+
+const removeOption = (option: SelectOption): void => {
+  if (props.multi) {
+    const newSelection = selectedOptions.value.filter(item => item.id !== option.id)
+    emit('update:modelValue', newSelection)
+  }
+}
+
+const openDropdown = (): void => {
+  if (!props.disabled) {
+    isOpen.value = true
+  }
+}
+
+const closeDropdown = (): void => {
+  isOpen.value = false
+  if (props.searchMode) {
+    searchQuery.value = ''
+  }
+}
+
+const toggleDropdown = (): void => {
+  if (isOpen.value) {
+    closeDropdown()
+  } else {
+    openDropdown()
+  }
+}
+
+const handleBlur = (): void => {
+  // Delay closing to allow for option selection
+  setTimeout(() => {
+    closeDropdown()
+  }, 150)
+}
+
+const handleKeydown = (event: KeyboardEvent): void => {
+  switch (event.key) {
+    case 'Escape':
+      closeDropdown()
+      break
+    case 'Enter':
+      if (props.searchMode && filteredOptions.value.length > 0) {
+        selectOption(filteredOptions.value[0])
+      }
+      break
+    case 'ArrowDown':
+      event.preventDefault()
+      if (!isOpen.value) {
+        openDropdown()
+      }
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      if (!isOpen.value) {
+        openDropdown()
+      }
+      break
+  }
+}
+
+// Handle clicks outside the component
+const handleClickOutside = (event: Event): void => {
+  const target = event.target as Element
+  const selectElement = props.searchMode ? searchInput.value : selectButton.value
+  if (selectElement && !selectElement.contains(target) && !target.closest('.absolute.z-10')) {
+    closeDropdown()
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+// Watch for search mode changes
+watch(() => props.searchMode, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      if (searchInput.value) {
+        searchInput.value.focus()
+      }
+    })
+  }
+})
 </script>
 
 <style scoped>

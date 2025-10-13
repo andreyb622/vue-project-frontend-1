@@ -107,67 +107,51 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import { ref } from 'vue'
 import CustomSelect from './CustomSelect.vue'
+import type { SelectOption } from '@/types/select'
 
-export default {
-  name: 'CustomSelectDemo',
-  components: {
-    CustomSelect
-  },
-  setup() {
-    // Sample data
-    const options = ref([
-      { id: '1', value: 'Apple' },
-      { id: '2', value: 'Banana' },
-      { id: '3', value: 'Cherry' },
-      { id: '4', value: 'Date' },
-      { id: '5', value: 'Elderberry' },
-      { id: '6', value: 'Fig' },
-      { id: '7', value: 'Grape' },
-      { id: '8', value: 'Honeydew' }
-    ])
+// Sample data
+const options = ref<SelectOption[]>([
+  { id: '1', value: 'Apple' },
+  { id: '2', value: 'Banana' },
+  { id: '3', value: 'Cherry' },
+  { id: '4', value: 'Date' },
+  { id: '5', value: 'Elderberry' },
+  { id: '6', value: 'Fig' },
+  { id: '7', value: 'Grape' },
+  { id: '8', value: 'Honeydew' }
+])
 
-    const largeOptions = ref([
-      { id: 'us', value: 'United States' },
-      { id: 'ca', value: 'Canada' },
-      { id: 'mx', value: 'Mexico' },
-      { id: 'uk', value: 'United Kingdom' },
-      { id: 'fr', value: 'France' },
-      { id: 'de', value: 'Germany' },
-      { id: 'it', value: 'Italy' },
-      { id: 'es', value: 'Spain' },
-      { id: 'jp', value: 'Japan' },
-      { id: 'kr', value: 'South Korea' },
-      { id: 'cn', value: 'China' },
-      { id: 'in', value: 'India' },
-      { id: 'au', value: 'Australia' },
-      { id: 'nz', value: 'New Zealand' },
-      { id: 'br', value: 'Brazil' },
-      { id: 'ar', value: 'Argentina' },
-      { id: 'za', value: 'South Africa' },
-      { id: 'eg', value: 'Egypt' },
-      { id: 'ng', value: 'Nigeria' },
-      { id: 'ru', value: 'Russia' }
-    ])
+const largeOptions = ref<SelectOption[]>([
+  { id: 'us', value: 'United States' },
+  { id: 'ca', value: 'Canada' },
+  { id: 'mx', value: 'Mexico' },
+  { id: 'uk', value: 'United Kingdom' },
+  { id: 'fr', value: 'France' },
+  { id: 'de', value: 'Germany' },
+  { id: 'it', value: 'Italy' },
+  { id: 'es', value: 'Spain' },
+  { id: 'jp', value: 'Japan' },
+  { id: 'kr', value: 'South Korea' },
+  { id: 'cn', value: 'China' },
+  { id: 'in', value: 'India' },
+  { id: 'au', value: 'Australia' },
+  { id: 'nz', value: 'New Zealand' },
+  { id: 'br', value: 'Brazil' },
+  { id: 'ar', value: 'Argentina' },
+  { id: 'za', value: 'South Africa' },
+  { id: 'eg', value: 'Egypt' },
+  { id: 'ng', value: 'Nigeria' },
+  { id: 'ru', value: 'Russia' }
+])
 
-    // Reactive values
-    const singleValue = ref(null)
-    const multiValue = ref([])
-    const singleSearchValue = ref(null)
-    const multiSearchValue = ref([])
-
-    return {
-      options,
-      largeOptions,
-      singleValue,
-      multiValue,
-      singleSearchValue,
-      multiSearchValue
-    }
-  }
-}
+// Reactive values
+const singleValue = ref<SelectOption | null>(null)
+const multiValue = ref<SelectOption[]>([])
+const singleSearchValue = ref<SelectOption | null>(null)
+const multiSearchValue = ref<SelectOption[]>([])
 </script>
 
 <style scoped>
