@@ -8,6 +8,9 @@
         <li v-if="isAuth">
           <router-link to="/profile">Profile</router-link>
         </li>
+        <li>
+          <router-link to="/select-demo">Select Demo</router-link>
+        </li>
       </ul>
       <ul>
         <li v-if="isAuth">

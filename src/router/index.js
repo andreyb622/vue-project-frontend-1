@@ -25,6 +25,12 @@ const routes = [
     component: () => import("../pages/Profile.vue"),
   },
   {
+    name: "select-demo",
+    path: "/select-demo",
+    meta: { needsAuth: false },
+    component: () => import("../components/ui/CustomSelectDemo.vue"),
+  },
+  {
     name: "auth",
     path: "/auth",
     meta: { needsAuth: false },

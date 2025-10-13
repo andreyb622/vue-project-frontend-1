@@ -3,6 +3,7 @@ import App from "./App.vue";
 import SettingAxios from "./plugins/axios";
 import router from "./router/index";
 import VuexStore from "./store/index";
+import "./assets/tailwind.css";
 
 SettingAxios(VuexStore);
 
