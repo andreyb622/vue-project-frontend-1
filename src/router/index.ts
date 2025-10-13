@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router"
 
 const routes = [
   {
@@ -23,6 +23,12 @@ const routes = [
     path: "/profile",
     meta: { needsAuth: true },
     component: () => import("../pages/Profile.vue"),
+  },
+  {
+    name: "select-demo",
+    path: "/select-demo",
+    meta: { needsAuth: false },
+    component: () => import("../components/ui/CustomSelectDemo.vue"),
   },
   {
     name: "auth",
@@ -60,4 +66,4 @@ router.beforeEach(function(to, _from, next) {
   }
 });
 
-export default router;
+export default router
